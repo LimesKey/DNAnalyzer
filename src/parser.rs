@@ -39,14 +39,15 @@ mod errors {
 }
 
 fn parseFasta(file: File) -> Result<(), errors::Errors>{
+    let mut file_content: Vec<String> = vec![];
     let reader = BufReader::new(file);
     let mut line_count: u8 = 0;
+    let mut to_break = false;
 
     for raw_line in reader.lines() {
         line_count+=1;
-        assert!(reader.buffer().is_empty());
 
-        let line = match raw_line {
+        let mut line = match raw_line {
             Ok(raw_line) => raw_line,
             Err(error) => return Err(Errors::IOError(error)),
         };
@@ -54,10 +55,28 @@ fn parseFasta(file: File) -> Result<(), errors::Errors>{
         match line {
             _ if line.is_empty() => return Err(Errors::EmptyLine(EmptyLine{line: line_count})),
             _ if !(line.is_ascii()) => return Err(Errors::TextEncodingError(TextEncodingError{line: line_count})),
+            _ => (),
         }
 
+        if line.starts_with(">") { // File descriptor
+            println!("Reading DNA: {}", String::from(line[1..].trim()));
+            continue;
+        }
+
+        if line.starts_with(";") { // Comment
+            continue;
+        }
+        else if line.ends_with("*") {
+            line = line.replace("*", "");
+            to_break = true;
+        }
+
+        file_content.push(line);
+
+        if to_break {
+            break;
+        }
 
     }
-
     Ok(())
 }
