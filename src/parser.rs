@@ -58,16 +58,16 @@ fn parseFasta(file: File) -> Result<(), errors::Errors>{
             _ => (),
         }
 
-        if line.starts_with(">") { // File descriptor
+        if line.starts_with('>') { // File descriptor
             println!("Reading DNA: {}", String::from(line[1..].trim()));
             continue;
         }
 
-        if line.starts_with(";") { // Comment
+        if line.starts_with(';') { // Comment
             continue;
         }
-        else if line.ends_with("*") {
-            line = line.replace("*", "");
+        else if line.ends_with('*') {
+            line = line.replace('*', "");
             to_break = true;
         }
 
