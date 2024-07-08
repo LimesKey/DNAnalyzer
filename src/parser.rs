@@ -1,6 +1,7 @@
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
+use std::path::Path;
 
 use errors::*;
 use crate::parser::errors::Errors;
@@ -38,7 +39,12 @@ mod errors {
     }
 }
 
-fn parseFasta(file: File) -> Result<(), errors::Errors>{
+pub fn parseFasta(file: &Path) -> Result<(), errors::Errors> {
+    let file = match File::open(file) {
+        Ok(file) => file,
+        Err(error) => return Err(Errors::IOError(error)),
+    };
+
     let mut file_content: Vec<String> = vec![];
     let reader = BufReader::new(file);
     let mut line_count: u8 = 0;
@@ -70,6 +76,7 @@ fn parseFasta(file: File) -> Result<(), errors::Errors>{
             line = line.replace('*', "");
             to_break = true;
         }
+        println!("Line {}: {}", line_count, line);
 
         file_content.push(line);
 
@@ -78,5 +85,6 @@ fn parseFasta(file: File) -> Result<(), errors::Errors>{
         }
 
     }
+    println!("sucess");
     Ok(())
 }
