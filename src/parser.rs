@@ -4,7 +4,6 @@ use std::fs::File;
 use std::path::Path;
 
 use errors::*;
-use crate::parser::errors::Errors;
 
 mod errors {
     use std::{error::Error, fmt};
@@ -17,25 +16,37 @@ mod errors {
         pub line: u8
     }
 
+    #[derive(Debug)]
+    pub enum Errors {
+        EmptyLine(EmptyLine),
+        TextEncodingError(TextEncodingError),
+        IOError(std::io::Error),
+    }
+
     impl Error for EmptyLine {}
     impl Error for TextEncodingError {}
+    impl Error for Errors {}
 
     impl fmt::Display for EmptyLine {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, "Empty line at line number: {}", self.line)
+            write!(f, "Empty line at line number: {}", self.line)
         }
     }
 
     impl fmt::Display for TextEncodingError {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, "Text encoding error at line number: {}", self.line)
+            write!(f, "Text encoding error at line number: {}", self.line)
         }
     }
 
-    pub enum Errors {
-        EmptyLine(EmptyLine),
-        IOError(std::io::Error),
-        TextEncodingError(TextEncodingError),
+    impl fmt::Display for Errors {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Errors::EmptyLine(err) => write!(f, "{}", err),
+                Errors::TextEncodingError(err) => write!(f, "{}", err),
+                Errors::IOError(err) => write!(f, "{}", err),
+            }
+        }
     }
 }
 
@@ -65,7 +76,7 @@ pub fn parseFasta(file: &Path) -> Result<(), errors::Errors> {
         }
 
         if line.starts_with('>') { // File descriptor
-            println!("Reading DNA: {}", String::from(line[1..].trim()));
+            println!("\nReading DNA Description: {}", String::from(line[1..].trim()));
             continue;
         }
 

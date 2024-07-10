@@ -5,7 +5,7 @@ use std::path::Path;
 fn main() {
     let mut dna_file_path = String::new();
 
-    print!("Enter file location: ");
+    println!("Enter file location: ");
     io::stdin().read_line(&mut dna_file_path).unwrap();
     let dna_file_path = Path::new(dna_file_path.trim()).canonicalize().unwrap();
     
